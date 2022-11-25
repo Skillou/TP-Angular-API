@@ -7,7 +7,7 @@ use Firebase\JWT\JWT;
 require "client.php";
 require __DIR__ . '/../vendor/autoload.php';
 
-const JWT_SECRET = "makey1234567";
+const JWT_SECRET = "Skillou67";
 
 $app = AppFactory::create();
 
@@ -33,6 +33,16 @@ function createJWT($login, $password) : string
 
     return JWT::encode($payload, JWT_SECRET);
 }
+
+//get user
+$app->get('/api/user', function (Request $request, Response $response, $args) {
+    $array = [];
+    $array ["nom"] = "Chek";
+    $array ["prenom"] = "Ray";
+    $response = addHeaders($response);
+    $response->getBody()->write(json_encode ($array));
+    return $response;
+});
 
 $app->get('/api/products', function (Request $request, Response $response) {
     $json = getProductsJSON();
