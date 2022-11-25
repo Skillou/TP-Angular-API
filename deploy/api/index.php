@@ -4,7 +4,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Firebase\JWT\JWT;
 require __DIR__ . '/../vendor/autoload.php';
-require "client.php";
+require "Client.php";
 
 const JWT_SECRET = "makey1234567";
 
