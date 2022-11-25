@@ -7,7 +7,7 @@ use Firebase\JWT\JWT;
 require "client.php";
 require __DIR__ . '/../vendor/autoload.php';
 
-const JWT_SECRET = "Skillou67";
+const JWT_SECRET = "makey1234567";
 
 $app = AppFactory::create();
 
@@ -51,7 +51,7 @@ $app->get('/api/products', function (Request $request, Response $response) {
 });
 
 function getProductsJSON() {
-    return file_get_contents(__DIR__ . '/mock/catalogueMock.json');
+    return file_get_contents(__DIR__ . '\mock\catalogueMock.json');
 }
 
 $app->get('/api/product/{id}', function (Request $request, Response $response, $args) {
@@ -109,13 +109,11 @@ $options = [
     "path" => ["/api"],
     "ignore" => ["/api/login", "/api/register"],
     "error" => function ($response) {
-        $data = array('ERREUR' => 'Connexion', 'ERREUR' => "Le JWT n'est pas valide");
+        $data = array('ERREUR' => 'Connexion', 'ERREUR' => 'JWT Non valide');
         $response = $response->withStatus(401);
         return $response->withHeader("Content-Type", "application/json")->getBody()->write(json_encode($data));
     }
 ];
-
-// https://discourse.slimframework.com/t/slim-v4-cors-tuupola/3763
 
 $app->addBodyParsingMiddleware();
 $app->add(new Tuupola\Middleware\JwtAuthentication($options));
