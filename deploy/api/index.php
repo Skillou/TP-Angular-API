@@ -2,46 +2,33 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
-use Firebase\JWT\JWT;
+use Tuupola\Middleware\HttpBasicAuthentication;
+use \Firebase\JWT\JWT;
 require __DIR__ . '/../vendor/autoload.php';
-require "Client.php";
-
-const JWT_SECRET = "makey1234567";
+ 
+const JWT_SECRET = "Skillou67JwtSecret";
+// const JWT_SECRET = "makey1234567";
 
 $app = AppFactory::create();
 
-$app->post('/api/login', function (Request $request, Response $response) {
-    $body = (array)$request->getParsedBody();
-    $login = $body['login'];
-    $password = $body['password'];
+function createJwT (Response $response) : Response {
 
-    $jwt = createJWT($login, $password);
-    return $response->withHeader("Authorization", "Bearer $jwt");
-});
-
-function createJWT($login, $password) : string
-{
     $issuedAt = time();
-    $expirationTime = $issuedAt + 600;
+    $expirationTime = $issuedAt + 60;
     $payload = array(
-        'login' => $login,
-        'password' => $password,
-        'iat' => $issuedAt,
-        'exp' => $expirationTime
+    'userid' => 'toto',
+    'email' => 'titi@gmail.com',
+    'pseudo' => 'titiPseudo',
+    'iat' => $issuedAt,
+    'exp' => $expirationTime
     );
 
-    return JWT::encode($payload, JWT_SECRET);
+    $token_jwt = JWT::encode($payload,JWT_SECRET, "HS256");
+    $response = $response->withHeader("Authorization", "Bearer {$token_jwt}");
+    return $response;
 }
 
-//get user
-$app->get('/api/user', function (Request $request, Response $response, $args) {
-    $array = [];
-    $array ["nom"] = "Chek";
-    $array ["prenom"] = "Ray";
-    $response = addHeaders($response);
-    $response->getBody()->write(json_encode ($array));
-    return $response;
-});
+// GET
 
 $app->get('/api/hello/{name}', function (Request $request, Response $response, $args) {
     $array = [];
@@ -50,60 +37,69 @@ $app->get('/api/hello/{name}', function (Request $request, Response $response, $
     return $response;
 });
 
-$app->get('/api/products', function (Request $request, Response $response) {
-    $json = getProductsJSON();
-    $response->getBody()->write($json);
+$app->get('/api/user', function (Request $request, Response $response, $args) {   
+    $data = array('nom' => 'toto', 'prenom' => 'titi','adresse' => '6 rue des fleurs', 'tel' => '0606060607');
+    $response->getBody()->write(json_encode($data));
+
     return $response;
 });
 
-function getProductsJSON() {
-    return file_get_contents(__DIR__ . '\mock\catalogueMock.json');
-}
+// POST
 
-$app->get('/api/product/{id}', function (Request $request, Response $response, $args) {
-    $id = $args ['id'];
-    $json = getProductsJSON();
-    $products = json_decode($json, true);
+// APi d'authentification générant un JWT
+$app->post('/api/login', function (Request $request, Response $response, $args) {   
+    $err=false;
+    $body = $request->getParsedBody();
+    $login = $body ['login'] ?? "";
+    $pass = $body ['pass'] ?? "";
 
-    $product = filterArrayById($products, $id);
-    $response->getBody()->write(json_encode($product));
+    if (!preg_match("/[a-zA-Z0-9]{1,20}/",$login))   {
+        $err = true;
+    }
+    if (!preg_match("/[a-zA-Z0-9]{1,20}/",$pass))  {
+        $err=true;
+    }
+
+    if (!$err) {
+            $response = createJwT ($response);
+            $data = array('nom' => 'Skillou', 'prenom' => 'Rayoux');
+            $response->getBody()->write(json_encode($data));
+     } else {          
+            $response = $response->withStatus(401);
+     }
     return $response;
 });
 
-function filterArrayById($array, $id)
-{
-    $filtered_array = array_filter($array, function ($elem) use ($id) {
-        if (isset($elem['id'])) {
-            return $elem['id'] == $id;
-        }
-        return false;
-    });
-    return current($filtered_array);
-}
+// DEL
 
-$app->post('/api/register', function (Request $request, Response $response) {
-    $body = (array)$request->getParsedBody();
-    $client = createClientFromBody($body);
-    $response->getBody()->write(json_encode($client));
+$app->delete('/api/user/{id}', function (Request $request, Response $response, $args) {   
+
+    // Logique delete
+
+        // Supprimer un produit
+        // $id = intval($_GET["id"]);
+        // deleteProduct($id);
+        // break;
+
     return $response;
 });
 
-function createClientFromBody($body): Client {
-    $client = new Client();
-    $client->firstname = $body['firstname'];
-    $client->lastname = $body['lastname'];
-    $client->email = $body['email'];
-    $client->login = $body['login'];
-    $client->password = $body['password'];
-    $client->phone = $body['phone'];
-    $client->locale = $body['locale'];
-    $client->address = $body['address'];
-    $client->city = $body['city'];
-    $client->zip = $body['zip'];
-    $client->country = $body['country'];
-    $client->civility = $body['civility'];
-    return $client;
-}
+$app->delete('/books/{id}', function ($request, $response, $args) {
+    // Delete book identified by $args['id']
+    // ...
+    
+    return $response;
+});
+
+// PUT
+
+$app->put('/api/user/{id}', function ($request, $response, $args) {
+    // Update book identified by $args['id']
+    // ...
+    
+    return $response;
+});
+
 
 $options = [
     "attribute" => "token",
@@ -113,21 +109,19 @@ $options = [
     "algorithm" => ["HS256"],
     "secret" => JWT_SECRET,
     "path" => ["/api"],
-    "ignore" => ["/api/login", "/api/register"],
-    "error" => function ($response) {
+    "ignore" => ["/api/hello","/api/login","/api/createUser"],
+    "error" => function ($response, $arguments) {
         $data = array('ERREUR' => 'Connexion', 'ERREUR' => 'JWT Non valide');
         $response = $response->withStatus(401);
         return $response->withHeader("Content-Type", "application/json")->getBody()->write(json_encode($data));
     }
 ];
 
-$app->addBodyParsingMiddleware();
 $app->add(new Tuupola\Middleware\JwtAuthentication($options));
-$app->add(new Tuupola\Middleware\CorsMiddleware([
-    "origin" => ["*"],
-    "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    "headers.allow" => ["Authorization", "Content-Type"],
-    "headers.expose" => ["Authorization"],
-]));
+$app->run ();
 
-$app->run();
+// GET /contrats              -> Récupère tous les contrats
+// POST /contrats             -> Crée un contrat 
+// GET /contrats/12           -> Récupère le contrat identifié par 12
+// PUT /contrats/12           -> Modifie le contrat 12  
+// DELETE /contrats/12        -> Supprime le contrat 1
