@@ -12,7 +12,6 @@ const JWT_SECRET = "Skillou67JwtSecret";
 $app = AppFactory::create();
 
 function createJwT (Response $response) : Response {
-
     $issuedAt = time();
     $expirationTime = $issuedAt + 60;
     $payload = array(
@@ -72,33 +71,33 @@ $app->post('/api/login', function (Request $request, Response $response, $args) 
 
 // DEL
 
-$app->delete('/api/user/{id}', function (Request $request, Response $response, $args) {   
+// $app->delete('/api/user/{id}', function (Request $request, Response $response, $args) {
+//
+//     // Logique delete
+//
+//         // Supprimer un produit
+//         // $id = intval($_GET["id"]);
+//         // deleteProduct($id);
+//         // break;
+//
+//     return $response;
+// });
 
-    // Logique delete
-
-        // Supprimer un produit
-        // $id = intval($_GET["id"]);
-        // deleteProduct($id);
-        // break;
-
-    return $response;
-});
-
-$app->delete('/books/{id}', function ($request, $response, $args) {
-    // Delete book identified by $args['id']
-    // ...
-    
-    return $response;
-});
-
-// PUT
-
-$app->put('/api/user/{id}', function ($request, $response, $args) {
-    // Update book identified by $args['id']
-    // ...
-    
-    return $response;
-});
+// $app->delete('/books/{id}', function ($request, $response, $args) {
+//     // Delete book identified by $args['id']
+//     // ...
+//
+//     return $response;
+// });
+//
+// // PUT
+//
+// $app->put('/api/user/{id}', function ($request, $response, $args) {
+//     // Update book identified by $args['id']
+//     // ...
+//
+//     return $response;
+// });
 
 
 $options = [
