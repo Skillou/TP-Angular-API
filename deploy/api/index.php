@@ -45,7 +45,6 @@ function createJwT (Response $response) : Response {
 }
 
 // GET
-
 $app->get('{name}', function (Request $request, Response $response, $args) {
     $array = [];
     $array ["nom"] = $args ['name'];
@@ -86,22 +85,6 @@ $app->post('/api/login', function (Request $request, Response $response, $args) 
     return $response;
 });
 
-// DEL
-
-$app->delete('/api/user/{id}', function (Request $request, Response $response, $args) {
-
-    // Logique delete
-
-        // Supprimer un produit
-        // $id = intval($_GET["id"]);
-        // deleteProduct($id);
-        // break;
-
-    return $response;
-});
-
-
-
 ///////////////////////////
 // API Catalogue Produit //
 //////////////////////////
@@ -109,19 +92,6 @@ $app->delete('/api/user/{id}', function (Request $request, Response $response, $
 $filename = './assets/mock/produits.json';
 $data = file_get_contents($filename);
 $array = json_decode($data);
-
-// if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-//   // Récupérer tous les enregistrements
-//   $repository = $entityManager->getRepository(Product::class);
-//   $products = $repository->findAll();
-//   echo json_encode($products);
-// }
-
-// $app->get('/api/catalogue', function (Request $request, Response $response, $args) {
-//     global $array;
-//     $response->getBody()->write(json_encode ($array));
-//     return $response;
-// });
 
 $app->get('/api/catalogue', function (Request $request, Response $response){
 
@@ -136,6 +106,103 @@ $app->get('/api/catalogue/{id}', function (Request $request, Response $response,
     $response->getBody()->write(json_encode ($array));
     return $response;
 });
+
+//////////////////////////////////////////////////////////
+////////////////////////SLIM/////////////////////////////
+/////////////////////////////////////////////////////////
+
+
+// Define a route to retrieve all products
+$app->get('/products', function (Request $request, Response $response) use ($entityManager) {
+    // Retrieve all products from the database
+    $products = $entityManager->getRepository(Product::class)->findAll();
+
+    // Return the products as JSON
+    return $response->withJson($products);
+});
+
+// Define a route to retrieve a single product by ID
+$app->get('/products/{id}', function (Request $request, Response $response, $args) use ($entityManager) {
+    // Retrieve the product from the database
+    $product = $entityManager->find(Product::class, $args['id']);
+
+    // If the product doesn't exist, return a 404 response
+    if (!$product) {
+        return $response->withStatus(404);
+    }
+
+    // Return the product as JSON
+    return $response->withJson($product);
+});
+
+// Define a route to create a new product
+$app->post('/products', function (Request $request, Response $response) use ($entityManager) {
+    // Create a new product entity
+    $product = new Product();
+    $product->setName($request->getParsedBody()['name']);
+    $product->setDescription($request->getParsedBody()['description']);
+    $product->setPrice($request->getParsedBody()['price']);
+    $product->setCategory($request->getParsedBody()['category']);
+    $product->setImage($request->getParsedBody()['image']);
+    $product->setSummary($request->getParsedBody()['summary']);
+
+    // Persist the entity to the database
+    $entityManager->persist($product);
+    $entityManager->flush();
+
+    // Return the new product as JSON
+    return $response->withJson($product);
+});
+
+$app->put('/products/{id}', function (Request $request, Response $response, $args) use ($entityManager) {
+    // Retrieve the product from the database
+    $product = $entityManager->find(Product::class, $args['id']);
+
+    // If the product doesn't exist, return a 404 response
+    if (!$product) {
+        return $response->withStatus(404);
+    }
+
+    // Update the product's properties with data from request
+    $product->setName($request->getParsedBody()['name']);
+    $product->setDescription($request->getParsedBody()['description']);
+    $product->setPrice($request->getParsedBody()['price']);
+    $product->setCategory($request->getParsedBody()['category']);
+    $product->setImage($request->getParsedBody()['image']);
+    $product->setSummary($request->getParsedBody()['summary']);
+
+    // Persist the changes to the database
+    $entityManager->persist($product);
+    $entityManager->flush();
+
+    // Return the updated product as JSON
+    return $response->withJson($product);
+});
+
+
+// Define a route to delete an existing product
+$app->delete('/products/{id}', function (Request $request, Response $response, $args) use ($entityManager) {
+    // Retrieve the product from the database
+    $product = $entityManager->find(Product::class, $args['id']);
+
+    // If the product doesn't exist, return a 404 response
+    if (!$product) {
+        return $response->withStatus(404);
+    }
+
+    // Remove the product from the database
+    $entityManager->remove($product);
+    $entityManager->flush();
+
+    // Return an empty response
+    return $response->withStatus(204);
+});
+
+
+
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
 
 $app->post('/api/catalogue/add', function (Request $request, Response $response, $args) {
     // Read the JSON file into a PHP object

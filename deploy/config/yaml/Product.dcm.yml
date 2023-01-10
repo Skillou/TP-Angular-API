@@ -1,6 +1,6 @@
-Products:
+Product:
     type: entity
-    table: products
+    table: product
     id:
         id:
             type: integer
@@ -18,7 +18,7 @@ Products:
             options:
                 fixed: false
         description:
-            type: stringAS
+            type: string
             nullable: false
             length: 24
             options:
