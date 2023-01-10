@@ -203,12 +203,12 @@ $app->delete('/products/{id}', function (Request $request, Response $response, $
 //////////////////////////////////////////////////////////
 
 // Define a route to retrieve all clients (users)
-$app->get('/products', function (Request $request, Response $response) use ($entityManager) {
+$app->get('/clients', function (Request $request, Response $response) use ($entityManager) {
     // Retrieve all clients/users from the database
-    $products = $entityManager->getRepository(Client::class)->findAll();
+    $clients = $entityManager->getRepository(Client::class)->findAll();
 
     // Return the products as JSON
-    return $response->withJson($products);
+    return $response->withJson($clients);
 });
 
 
