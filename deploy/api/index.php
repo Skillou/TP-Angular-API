@@ -228,14 +228,6 @@ $app->post('/api/catalogue/add', function (Request $request, Response $response,
 
     $response->getBody()->write($testJson);
 
-    // $response->getBody()->write(json_encode ($array));
-
-    // $json = substr($json, 0, -1).','.json_encode($item).']';
-
-    // file_put_contents('./assets/mock/produits.json', $json, FILE_APPEND);
-
-    // $response->getBody()->write(json_encode ($array));
-
     return $response;
 });
 
