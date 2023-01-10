@@ -204,46 +204,6 @@ $app->delete('/products/{id}', function (Request $request, Response $response, $
 /////////////////////////////////////////////////////
 /////////////////////////////////////////////////////
 
-$app->post('/api/catalogue/add', function (Request $request, Response $response, $args) {
-    // Read the JSON file into a PHP object
-    global $array;
-
-    // Read the JSON file into a string
-    $json = json_encode($array, true);
-
-    // Append a new item to the end of the string
-    $item = array(
-    'id' => 123,
-    'name' => 'Livre de fou',
-    'description' => 'Ceci est un livre',
-    'price' => 4.5,
-    'category' => "livre",
-    'image' => '',
-    'summary' => 'Livre description'
-    );
-
-    $testJson = substr($json, 0, -1).','.json_encode($item).']';
-
-    file_put_contents('./assets/mock/produits.json', $testJson, FILE_APPEND);
-
-    $response->getBody()->write($testJson);
-
-    return $response;
-});
-
-$app->put('/api/catalogue/{id}', function ($request, $response, $args) {
-    // Update book identified by $args['id']
-    // ...
-
-    return $response;
-});
-
-$app->delete('/api/catalogue/{id}', function ($request, $response, $args) {
-    // Delete book identified by $args['id']
-    // ...
-
-    return $response;
-});
 
 $options = [
     "attribute" => "token",
